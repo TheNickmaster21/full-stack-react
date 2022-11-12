@@ -1,5 +1,5 @@
 ---
-service: serverless-react-boilerplate
+service: full-stack-react
 frameworkVersion: "3"
 useDotenv: true
 variablesResolutionMode: 20210326
@@ -8,12 +8,11 @@ disabledDeprecations:
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   region: ${opt:region, 'us-east-1'}
   stage: ${opt:stage, 'dev'}
   memorySize: 512
   timeout: 6
-  logRetentionInDays: 7
   lambdaHashingVersion: 20201221 # for upcoming Serverless v3
 
   apiGateway:
