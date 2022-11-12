@@ -5,12 +5,16 @@ import { Config } from "../../server/config";
 
 const ConfigContext = createContext<Config>({
   app: {
-    TITLE: `${manifest.short_name} Mock`,
+    TITLE: `${manifest.short_name}`,
     THEME_COLOR: manifest.theme_color,
     URL: "http://localhost:3000",
     DIST_URL: "http://localhost:8080",
     PUBLIC_URL: "http://localhost:8080",
   },
+
+  counter: 0,
+  stage: "",
+  path: "",
 });
 
 export default ConfigContext;
