@@ -10,15 +10,19 @@ import logo from "./logo.svg";
  */
 export default function App() {
   const config = useConfig();
+  console.log(config);
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <h1 className="App-title">Welcome to {config.app.TITLE}</h1>
       </header>
-      <p className="App-intro">
-        To get started, edit <code>src/App.tsx</code> and save to reload.
-      </p>
+      {!config.path && <p className="App-intro">You shouldn't be here yet!</p>}
+      {config.path?.includes("route1") && <p>Welcome to Route 1!</p>}
+      {config.path?.includes("route2") && <p>Welcome to Route 2!</p>}
+      <p>This lambda is now serving #{config.counter}.</p>
+      <a href={`${config.stage}/`}>Home</a> <a href={`${config.stage}/route1`}>Route 1</a>{" "}
+      <a href={`${config.stage}/route2`}>Route 2</a>
     </div>
   );
 }
