@@ -1,21 +1,6 @@
-# ♨️ serverless-react-boilerplate
+# Full Stack React
 
-[![serverless](http://public.serverless.com/badges/v3.svg)](http://www.serverless.com)
-[![dependencies](https://img.shields.io/david/arabold/serverless-react-boilerplate.svg)](https://github.com/arabold/serverless-react-boilerplate)
-
-Lightweight boilerplate project to set up a React 17 web application on AWS Lambda using the Serverless Framework.
-
-## Key Features
-
-- Universal app; server-side rendering with dynamic configuration context passed from backend to browser.
-- Self-contained; no additional setup steps necessary other than running `npx sls deploy`.
-- Lightweight; no mandatory `redux`, `react-router`, `sass`, `less` or any other 3rd party dependency for full flexibility.
-- React "Fast Refresh" (previously known as "Hot Reloading") using the [React Refresh Webpack Plugin](https://github.com/pmmmwh/react-refresh-webpack-plugin).
-- Built-in support for [code splitting](https://webpack.js.org/guides/code-splitting/) and [tree shaking](https://webpack.js.org/guides/tree-shaking/) to optimize page loading times.
-- Full [TypeScript](https://www.typescriptlang.org/) support using Babel 7 and Webpack 5, including custom [module resolution](https://www.typescriptlang.org/docs/handbook/module-resolution.html).
-- Working [Jest](https://jestjs.io/) test environment.
-
-[Looking for the plain JavaScript version of this boilerplate?](https://github.com/arabold/serverless-react-boilerplate/)
+Messing around with server rendered react (via AWS Lambda), following the example of https://github.com/TheNickmaster21/full-stack-react.
 
 ## Overview
 
