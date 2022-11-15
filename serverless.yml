@@ -2,7 +2,6 @@
 service: full-stack-react
 frameworkVersion: "3"
 useDotenv: true
-variablesResolutionMode: 20210326
 disabledDeprecations:
   - CLI_OPTIONS_SCHEMA # some Serverless plugins haven't been updated yet and generate warnings
 
@@ -13,7 +12,6 @@ provider:
   stage: ${opt:stage, 'dev'}
   memorySize: 512
   timeout: 6
-  lambdaHashingVersion: 20201221 # for upcoming Serverless v3
 
   apiGateway:
     shouldStartNameWithService: true # for upcoming Serverless v3
@@ -23,17 +21,9 @@ provider:
     SERVERLESS_REGION: ${self:provider.region}
     SERVERLESS_STAGE: ${self:provider.stage}
 
-    APP_DIST_URL: ${self:custom.distBucketUrl.${self:provider.region}, self:custom.distBucketUrl.default}
-    APP_PUBLIC_URL: ${self:custom.distBucketUrl.${self:provider.region}, self:custom.distBucketUrl.default}
-    APIGATEWAY_URL:
-      Fn::Join:
-        - ""
-        - - https://
-          - Ref: ApiGatewayRestApi
-          - .execute-api.
-          - Ref: AWS::Region
-          - .amazonaws.com/
-          - ${self:provider.stage}
+    APP_DIST_URL: ${self:custom.domains.staticDomain}
+    APP_PUBLIC_URL: ${self:custom.domains.staticDomain}
+    APP_RENDERING_URL: ${self:custom.domains.baseDomain}
 
 plugins:
   - serverless-webpack
@@ -56,21 +46,10 @@ functions:
           cors: true
 
 custom:
-  distBucketUrl:
-    us-east-1:
-      # us-east-1 uses a different URL format than the other regions
-      Fn::Join:
-        - ""
-        - - https://s3.amazonaws.com/
-          - Ref: DistBucket
-    default:
-      # All other regions
-      Fn::Join:
-        - ""
-        - - https://s3-
-          - Ref: AWS::Region
-          - .amazonaws.com/
-          - Ref: DistBucket
+  domains:
+    baseDomain: nickma.in
+    staticDomain: static.nickma.in
+    certificateArn: arn:aws:acm:us-east-1:714073467103:certificate/4131562a-a526-4fb5-829b-a3de3e074a04
 
   scripts:
     hooks:
@@ -131,6 +110,76 @@ resources:
                       - .amazonaws.com
               MaxAge: 3000
 
+    # CloudFront Distribution for static content
+    S3CloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Comment: CloudFront Distribution for static assets
+          Aliases:
+            - ${self:custom.domains.staticDomain}
+          Origins:
+            - Id: BucketOrigin
+              DomainName:
+                Fn::Join:
+                  - "."
+                  - - Ref: DistBucket
+                    - s3.amazonaws.com
+              CustomOriginConfig:
+                HTTPPort: 80
+                HTTPSPort: 443
+                OriginProtocolPolicy: https-only
+          Enabled: "true"
+          DefaultCacheBehavior:
+            AllowedMethods:
+              - DELETE
+              - GET
+              - HEAD
+              - OPTIONS
+              - PATCH
+              - POST
+              - PUT
+            TargetOriginId: BucketOrigin
+            ForwardedValues:
+              QueryString: "false"
+              Cookies:
+                Forward: none
+            ViewerProtocolPolicy: redirect-to-https
+          ViewerCertificate:
+            SslSupportMethod: sni-only
+            AcmCertificateArn: ${self:custom.domains.certificateArn}
+
+    # CloudFront Distribution for server side rendering
+    ServerRenderCloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Comment: CloudFront Distribution for server side React rendering
+          Aliases:
+            - ${self:custom.domains.baseDomain}
+          DefaultCacheBehavior:
+            TargetOriginId: ServerRenderingOrigin
+            ViewerProtocolPolicy: "redirect-to-https"
+            DefaultTTL: 30
+            ForwardedValues:
+              QueryString: false
+          Enabled: true
+          Origins:
+            - Id: ServerRenderingOrigin
+              DomainName:
+                Fn::Join:
+                  - "."
+                  - - Ref: ApiGatewayRestApi
+                    - execute-api.us-east-1.amazonaws.com
+              OriginPath: /${opt:stage, 'dev'}
+              CustomOriginConfig:
+                HTTPPort: 80
+                HTTPSPort: 443
+                OriginProtocolPolicy: https-only
+          ViewerCertificate:
+            SslSupportMethod: sni-only
+            AcmCertificateArn: ${self:custom.domains.certificateArn}
+
   Outputs:
     ApiGatewayRestApi:
       Description: API Gateway Endpoint
@@ -140,3 +189,9 @@ resources:
       Description: Distribution S3 Bucket
       Value:
         Ref: DistBucket
+    S3CloudFrontDistributionOutput:
+      Value:
+        "Fn::GetAtt": [S3CloudFrontDistribution, DomainName]
+    ServerRenderCloudFrontDistributionOutput:
+      Value:
+        "Fn::GetAtt": [ServerRenderCloudFrontDistribution, DomainName]
