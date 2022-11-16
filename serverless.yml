@@ -18,9 +18,9 @@ provider:
     SERVERLESS_REGION: ${self:provider.region}
     SERVERLESS_STAGE: ${self:provider.stage}
 
-    APP_DIST_URL: ${self:custom.domains.staticDomain}
-    APP_PUBLIC_URL: ${self:custom.domains.staticDomain}
-    APP_RENDERING_URL: ${self:custom.domains.baseDomain}
+    APP_DIST_URL: https://${self:custom.domains.staticDomain}
+    APP_PUBLIC_URL: https://${self:custom.domains.staticDomain}
+    APP_RENDERING_URL: https://${self:custom.domains.baseDomain}
 
 plugins:
   - serverless-webpack
@@ -107,6 +107,25 @@ resources:
                       - .amazonaws.com
               MaxAge: 3000
 
+    S3CloudFrontDistrbutionResponseHeadersPolicy:
+      Type: AWS::CloudFront::ResponseHeadersPolicy
+      Properties:
+        ResponseHeadersPolicyConfig:
+          Name: S3CloudFrontDistrbutionResponseHeadersPolicy
+          CorsConfig:
+            AccessControlAllowCredentials: false
+            AccessControlAllowHeaders:
+              Items:
+                - "*"
+            AccessControlAllowMethods:
+              Items:
+                - OPTIONS
+                - GET
+            AccessControlAllowOrigins:
+              Items:
+                - ${self:custom.domains.baseDomain}
+            OriginOverride: true
+
     # CloudFront Distribution for static content
     S3CloudFrontDistribution:
       Type: AWS::CloudFront::Distribution
@@ -138,10 +157,11 @@ resources:
               - PUT
             TargetOriginId: BucketOrigin
             ForwardedValues:
-              QueryString: "false"
+              QueryString: false
               Cookies:
                 Forward: none
             ViewerProtocolPolicy: redirect-to-https
+            ResponseHeadersPolicyId: { Ref: S3CloudFrontDistrbutionResponseHeadersPolicy }
           ViewerCertificate:
             SslSupportMethod: sni-only
             AcmCertificateArn: ${self:custom.domains.certificateArn}
@@ -157,9 +177,9 @@ resources:
           DefaultCacheBehavior:
             TargetOriginId: ServerRenderingOrigin
             ViewerProtocolPolicy: "redirect-to-https"
-            DefaultTTL: 30
+            DefaultTTL: 0
             ForwardedValues:
-              QueryString: false
+              QueryString: true
           Enabled: true
           Origins:
             - Id: ServerRenderingOrigin
