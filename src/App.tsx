@@ -22,7 +22,7 @@ export default function App() {
       {config.path?.includes("route2") && <p>Welcome to Route 2!</p>}
       {config.path?.includes("routeRoll") && <RickRoll />}
       <p>This lambda is now serving #{config.counter}.</p>
-      <a href={``}>Home</a> <a href={`route1`}>Route 1</a> <a href={`route2`}>Route 2</a>{" "}
+      <a href={`/`}>Home</a> <a href={`route1`}>Route 1</a> <a href={`route2`}>Route 2</a>{" "}
       <a href={`routeRoll`}>Route Roll</a>
     </div>
   );
