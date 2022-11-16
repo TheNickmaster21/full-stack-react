@@ -10,7 +10,6 @@ import logo from "./logo.svg";
  */
 export default function App() {
   const config = useConfig();
-  console.log(config);
   return (
     <div className="App">
       <header className="App-header">
@@ -21,8 +20,7 @@ export default function App() {
       {config.path?.includes("route1") && <p>Welcome to Route 1!</p>}
       {config.path?.includes("route2") && <p>Welcome to Route 2!</p>}
       <p>This lambda is now serving #{config.counter}.</p>
-      <a href={`${config.stage}/`}>Home</a> <a href={`${config.stage}/route1`}>Route 1</a>{" "}
-      <a href={`${config.stage}/route2`}>Route 2</a>
+      <a href={``}>Home</a> <a href={`route1`}>Route 1</a> <a href={`route2`}>Route 2</a>
     </div>
   );
 }
