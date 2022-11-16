@@ -45,6 +45,7 @@ functions:
 custom:
   domains:
     baseDomain: nickma.in
+    alternateBaseDomain: www.nickma.in
     staticDomain: static.nickma.in
     certificateArn: arn:aws:acm:us-east-1:714073467103:certificate/4131562a-a526-4fb5-829b-a3de3e074a04
 
@@ -174,6 +175,7 @@ resources:
           Comment: CloudFront Distribution for server side React rendering
           Aliases:
             - ${self:custom.domains.baseDomain}
+            - ${self:custom.domains.alternateBaseDomain}
           DefaultCacheBehavior:
             TargetOriginId: ServerRenderingOrigin
             ViewerProtocolPolicy: "redirect-to-https"
